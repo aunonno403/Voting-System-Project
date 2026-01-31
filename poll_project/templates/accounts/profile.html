@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Profile: {{ user.username }}</h2>
+                <hr>
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email|default:"Not provided" }}</p>
+                <p><strong>Date Joined:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
+                <p><strong>Total Votes Cast:</strong> {{ total_votes }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Your Voting History</h3>
+                <hr>
+                
+                {% if voted_questions %}
+                    <div class="list-group">
+                        {% for question in voted_questions %}
+                            <div class="list-group-item">
+                                <h5>{{ question.question_text }}</h5>
+                                <p class="mb-1 text-muted">
+                                    <small>Voted on: {{ question.pub_date|date:"F d, Y" }}</small>
+                                </p>
+                                {% for choice in question.choice_set.all %}
+                                    {% for vote in choice.vote_set.all %}
+                                        {% if vote.user == user %}
+                                            <p class="mb-1">
+                                                <span class="badge badge-success">Your Vote:</span> 
+                                                <strong>{{ choice.choice_text }}</strong>
+                                            </p>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                                <div class="mt-2">
+                                    <a href="{% url 'polls:results' question.id %}" class="btn btn-sm btn-outline-primary">View Results</a>
+                                    <a href="{% url 'polls:detail' question.id %}" class="btn btn-sm btn-outline-secondary">Change Vote</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <p>You haven't voted on any polls yet.</p>
+                        <a href="{% url 'polls:index' %}" class="btn btn-primary">Browse Polls</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Quick Stats</h5>
+                <hr>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>Total Votes:</strong> {{ total_votes }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Polls Voted On:</strong> {{ voted_questions.count }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Member Since:</strong> {{ user.date_joined|date:"M Y" }}
+                    </li>
+                </ul>
+                <hr>
+                <a href="{% url 'polls:index' %}" class="btn btn-primary btn-block w-100">Browse Polls</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
