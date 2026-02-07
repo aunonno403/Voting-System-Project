@@ -68,10 +68,14 @@ def profile(request):
         choice__vote__user=user
     ).distinct().order_by('-pub_date')
     
+    # Get polls the user is invited to (private polls)
+    invited_polls = user.invited_polls.filter(is_draft=False).order_by('-pub_date')
+    
     context = {
         'user': user,
         'voted_questions': voted_questions,
         'total_votes': user_votes.count(),
+        'invited_polls': invited_polls,
     }
     
     return render(request, 'accounts/profile.html', context)

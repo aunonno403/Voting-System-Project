@@ -1,35 +1,162 @@
 {% extends 'base.html' %}
 {% block content %}
-<a class ="btn btn-secondary btn-sm mb-3" href ="{% url 'polls:index' %}">Back To Polls</a>
-<h1 class ="text-center mb-3">{{ question.question_text }}</h1>
+<a class="btn btn-secondary btn-sm mb-3" href="{% url 'polls:index' %}">Back To Polls</a>
 
-{% if user_vote %}
-<div class="alert alert-info">
-	<strong>Note:</strong> You already voted on this poll. You can change your vote below.
+<!-- Poll Header -->
+<div class="card mb-4">
+    <div class="card-body">
+        {% if question.image %}
+        <img src="{{ question.image.url }}" class="img-fluid mb-3 rounded" alt="Poll image" style="max-height: 300px; object-fit: cover; width: 100%;">
+        {% endif %}
+        
+        <h1 class="card-title">{{ question.question_text }}</h1>
+        
+        {% if question.description %}
+        <p class="text-muted">{{ question.description }}</p>
+        {% endif %}
+        
+        <div class="mb-3">
+            {% if question.category %}
+                <a href="{% url 'polls:category' question.category.slug %}" class="badge badge-info">{{ question.category.name }}</a>
+            {% endif %}
+            
+            {% if question.allow_multiple_choices %}
+                <span class="badge badge-warning">Multiple Choice - Select all that apply</span>
+            {% endif %}
+            
+            {% if question.visibility == 'private' and user.is_authenticated and user in question.invited_users.all %}
+                <span class="badge badge-dark">🔒 Private Poll</span>
+                <span class="badge badge-info">👥 You're Invited</span>
+            {% elif question.visibility == 'private' and user == question.created_by %}
+                <span class="badge badge-dark">🔒 Private Poll (Your Poll)</span>
+            {% elif question.visibility == 'password' %}
+                <span class="badge badge-secondary">🔒 Password Protected</span>
+            {% endif %}
+            
+            {% if question.is_upcoming %}
+                <span class="badge badge-info">Starts: {{ question.start_date|date:"M d, Y H:i" }}</span>
+            {% elif question.is_expired %}
+                <span class="badge badge-danger">Ended: {{ question.end_date|date:"M d, Y H:i" }}</span>
+            {% elif question.is_active %}
+                <span class="badge badge-success">Active</span>
+                {% if question.end_date %}
+                    <span class="badge badge-secondary">Ends: {{ question.end_date|date:"M d, Y H:i" }}</span>
+                {% endif %}
+            {% endif %}
+        </div>
+        
+        <p class="text-muted small mb-0">
+            <strong>Posted:</strong> {{ question.pub_date|date:"F d, Y" }} | 
+            <strong>Total Votes:</strong> {{ question.total_votes }}
+        </p>
+    </div>
 </div>
+
+{% if not question.is_active %}
+    <div class="alert alert-warning">
+        {% if question.is_upcoming %}
+            <strong>This poll hasn't started yet.</strong> It will open on {{ question.start_date|date:"F d, Y \a\t H:i" }}.
+        {% elif question.is_expired %}
+            <strong>This poll has ended.</strong> You can view the results below.
+        {% endif %}
+        <a href="{% url 'polls:results' question.id %}" class="btn btn-sm btn-primary">View Results</a>
+    </div>
+{% else %}
+    {% if user_votes %}
+    <div class="alert alert-info">
+        <strong>Note:</strong> You already voted on this poll. You can change your vote below.
+    </div>
+    {% endif %}
+
+    {% if error_message %}
+    <p class="alert alert-danger">
+        <strong>{{ error_message }}</strong>
+    </p>
+    {% endif %}
+
+    <!-- Voting Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Cast Your Vote</h4>
+            <form action="{% url 'polls:vote' question.id %}" method="post">
+                {% csrf_token %}
+                {% for choice in question.choice_set.all %}
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <div class="form-check">
+                            {% if question.allow_multiple_choices %}
+                                <input type="checkbox" name="choice" class="form-check-input" id="choice{{ forloop.counter }}"
+                                    value="{{ choice.id }}" 
+                                    {% if choice.id in user_votes %}checked{% endif %} />
+                            {% else %}
+                                <input type="radio" name="choice" class="form-check-input" id="choice{{ forloop.counter }}"
+                                    value="{{ choice.id }}" 
+                                    {% if choice.id in user_votes %}checked{% endif %} />
+                            {% endif %}
+                            <label for="choice{{ forloop.counter }}" class="form-check-label">
+                                <strong>{{ choice.choice_text }}</strong>
+                                {% if choice.id in user_votes %}
+                                    <span class="badge badge-primary">Your Current Vote</span>
+                                {% endif %}
+                            </label>
+                            {% if choice.description %}
+                                <p class="text-muted small mb-0 ml-4">{{ choice.description }}</p>
+                            {% endif %}
+                            {% if choice.image %}
+                                <img src="{{ choice.image.url }}" class="img-thumbnail ml-4 mt-2" style="max-width: 150px;" alt="Choice image">
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <input type="submit" value="{% if user_votes %}Update Vote{% else %}Vote{% endif %}" class="btn btn-success btn-lg btn-block mt-4 w-100" />
+            </form>
+        </div>
+    </div>
 {% endif %}
 
-{% if error_message %}
-<p class ="alert alert-danger">
-	<strong>{{ error_message }}</strong>
-</p>
-{% endif %}
-
-<form action ="{% url 'polls:vote' question.id %}" method ="post">
-	{% csrf_token %}
-	{% for choice in question.choice_set.all %}
-	<div class ="form-check">
-		<input type ="radio" name ="choice" class ="form-check-input" id ="choice{{ forloop.counter }}"
-			value ="{{ choice.id }}" 
-			{% if user_vote and user_vote.choice.id == choice.id %}checked{% endif %} />
-		<label for ="choice{{ forloop.counter }}">
-			{{ choice.choice_text }}
-			{% if user_vote and user_vote.choice.id == choice.id %}
-				<span class="badge badge-primary">Your Current Vote</span>
-			{% endif %}
-		</label>
-	</div>
-	{% endfor %}
-	<input type ="submit" value ="{% if user_vote %}Update Vote{% else %}Vote{% endif %}" class ="btn btn-success btn-lg btn-block mt-4 w-100" />
-</form>
+<!-- Comments Section -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Comments ({{ question.comments.count }})</h5>
+    </div>
+    <div class="card-body">
+        {% if user.is_authenticated %}
+            <form action="{% url 'polls:add_comment' question.id %}" method="post" class="mb-4">
+                {% csrf_token %}
+                <div class="form-group">
+                    <textarea name="comment_text" class="form-control" rows="3" placeholder="Add your comment..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Post Comment</button>
+            </form>
+        {% else %}
+            <p class="text-muted"><a href="{% url 'accounts:login' %}">Login</a> to post a comment.</p>
+        {% endif %}
+        
+        <hr>
+        
+        {% if comments %}
+            {% for comment in comments %}
+            <div class="media mb-3">
+                <div class="media-body">
+                    <h6 class="mt-0">
+                        <strong>{{ comment.user.username }}</strong>
+                        <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                        {% if comment.is_edited %}
+                            <span class="badge badge-secondary">edited</span>
+                        {% endif %}
+                    </h6>
+                    <p>{{ comment.text }}</p>
+                    {% if user == comment.user or user.is_staff %}
+                        <a href="{% url 'polls:delete_comment' comment.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this comment?');">Delete</a>
+                    {% endif %}
+                </div>
+            </div>
+            <hr>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No comments yet. Be the first to comment!</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

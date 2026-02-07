@@ -1,39 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1 class="text-center mb-4">Poll Questions</h1>
+<h1 class="text-center mb-4">{{ category.name }}</h1>
 
-<!-- Search and Filter Section -->
+{% if category.description %}
 <div class="card mb-4">
     <div class="card-body">
-        <form method="get" class="form-inline">
-            <input type="text" name="search" class="form-control mr-2 mb-2" placeholder="Search polls..." value="{{ search_query }}">
-            
-            <select name="category" class="form-control mr-2 mb-2">
-                <option value="">All Categories</option>
-                {% for cat in categories %}
-                    <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
-                {% endfor %}
-            </select>
-            
-            <select name="status" class="form-control mr-2 mb-2">
-                <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
-                <option value="upcoming" {% if status == 'upcoming' %}selected{% endif %}>Upcoming</option>
-                <option value="expired" {% if status == 'expired' %}selected{% endif %}>Expired</option>
-                <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
-            </select>
-            
-            <button type="submit" class="btn btn-primary mb-2">Filter</button>
-            <a href="{% url 'polls:index' %}" class="btn btn-secondary ml-2 mb-2">Clear</a>
-        </form>
+        <p class="mb-0">{{ category.description }}</p>
     </div>
 </div>
-
-{% if not user.is_authenticated %}
-<div class="alert alert-info">
-    <strong>Note:</strong> <a href="{% url 'accounts:login' %}" class="alert-link">Login</a> to vote on polls. 
-    Don't have an account? <a href="{% url 'accounts:register' %}" class="alert-link">Register here</a>.
-</div>
 {% endif %}
+
+<p class="text-muted">Showing {{ polls|length }} poll{{ polls|length|pluralize }} in this category</p>
 
 {% if polls %}
     {% for question in polls %}
@@ -53,33 +30,27 @@
                     {% endif %}
                     
                     <div class="mb-2">
-                        {% if question.category %}
-                            <a href="{% url 'polls:category' question.category.slug %}" class="badge badge-info">{{ question.category.name }}</a>
-                        {% endif %}
-                        
                         {% if question.allow_multiple_choices %}
                             <span class="badge badge-warning">Multiple Choice</span>
                         {% endif %}
                         
                         {% if question.visibility == 'password' %}
-                            <span class="badge badge-secondary">🔒 Password Protected</span>
+                            <span class="badge badge-secondary">Password Protected</span>
                         {% elif question.visibility == 'private' %}
-                            <span class="badge badge-dark">🔒 Private</span>
+                            <span class="badge badge-dark">Private</span>
                             {% if user.is_authenticated and user in question.invited_users.all %}
-                                <span class="badge badge-info">👥 Invited</span>
+                                <span class="badge badge-info">Invited</span>
                             {% endif %}
                         {% endif %}
                         
-                        {% if question.is_upcoming %}
-                            <span class="badge badge-info">📅 Upcoming</span>
+                        {% if question.is_active %}
+                            <span class="badge badge-success">Active</span>
                         {% elif question.is_expired %}
-                            <span class="badge badge-danger">⏰ Expired</span>
-                        {% elif question.is_active %}
-                            <span class="badge badge-success">✅ Active</span>
+                            <span class="badge badge-danger">Expired</span>
                         {% endif %}
                         
                         {% if user.is_authenticated and question.id in user_votes %}
-                            <span class="badge badge-primary">✓ You Voted</span>
+                            <span class="badge badge-primary">You Voted</span>
                         {% endif %}
                     </div>
                     
@@ -111,8 +82,10 @@
     </div>
     {% endfor %}
 {% else %}
-    <div class="alert alert-warning">
-        <p class="mb-0">No polls found matching your criteria.</p>
+    <div class="alert alert-info">
+        <p class="mb-0">No active polls in this category yet.</p>
     </div>
 {% endif %}
+
+<a href="{% url 'polls:index' %}" class="btn btn-secondary">Back to All Polls</a>
 {% endblock %}
