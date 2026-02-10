@@ -17,28 +17,28 @@
         
         <div class="text-center mb-3">
             {% if question.category %}
-                <a href="{% url 'polls:category' question.category.slug %}" class="badge badge-info">{{ question.category.name }}</a>
+                <a href="{% url 'polls:category' question.category.slug %}" class="badge bg-info text-dark">{{ question.category.name }}</a>
             {% endif %}
             
             {% if question.allow_multiple_choices %}
-                <span class="badge badge-warning">Multiple Choice Poll</span>
+                <span class="badge bg-warning text-dark">Multiple Choice Poll</span>
             {% endif %}
             
             {% if question.visibility == 'private' and user.is_authenticated and user in question.invited_users.all %}
-                <span class="badge badge-dark">🔒 Private</span>
-                <span class="badge badge-info">👥 Invited</span>
+                <span class="badge bg-dark">🔒 Private</span>
+                <span class="badge bg-info text-dark">👥 Invited</span>
             {% elif question.visibility == 'private' and user == question.created_by %}
-                <span class="badge badge-dark">🔒 Private (Your Poll)</span>
+                <span class="badge bg-dark">🔒 Private (Your Poll)</span>
             {% elif question.visibility == 'password' %}
-                <span class="badge badge-secondary">🔒 Password Protected</span>
+                <span class="badge bg-secondary">🔒 Password Protected</span>
             {% endif %}
             
             {% if question.is_upcoming %}
-                <span class="badge badge-info">Upcoming</span>
+                <span class="badge bg-info text-dark">Upcoming</span>
             {% elif question.is_expired %}
-                <span class="badge badge-danger">Ended</span>
+                <span class="badge bg-danger">Ended</span>
             {% elif question.is_active %}
-                <span class="badge badge-success">Active</span>
+                <span class="badge bg-success">Active</span>
             {% endif %}
         </div>
         
@@ -67,6 +67,14 @@
         <h4 class="mb-0">Results</h4>
     </div>
     <div class="card-body">
+        <!-- Chart -->
+        <div class="mb-5">
+            <div style="position: relative; height: 300px;">
+                <canvas id="resultsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Detailed Results -->
         {% for choice in question.choice_set.all %}
         <div class="mb-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -74,11 +82,11 @@
                     <strong>{{ choice.choice_text }}</strong>
                     {% for vote in user_votes %}
                         {% if vote.choice.id == choice.id %}
-                            <span class="badge badge-primary ml-2">Your Vote</span>
+                            <span class="badge bg-primary ms-2">Your Vote</span>
                         {% endif %}
                     {% endfor %}
                 </span>
-                <span class="badge badge-success badge-pill">
+                <span class="badge bg-success rounded-pill">
                     {{ choice.votes }} vote{{ choice.votes|pluralize }} ({{ choice.vote_percentage }}%)
                 </span>
             </div>
@@ -156,4 +164,73 @@
         {% endif %}
     </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart.js data for results visualization
+    const chartCanvas = document.getElementById('resultsChart');
+    if (chartCanvas) {
+        const ctx = chartCanvas.getContext('2d');
+        
+        const chartData = {
+            labels: [
+                {% for choice in question.choice_set.all %}"{{ choice.choice_text }}"{% if not forloop.last %},{% endif %}{% endfor %}
+            ],
+            datasets: [{
+                label: 'Votes',
+                data: [
+                    {% for choice in question.choice_set.all %}{{ choice.votes }}{% if not forloop.last %},{% endif %}{% endfor %}
+                ],
+                backgroundColor: [
+                    '#0d6efd',
+                    '#198754',
+                    '#ffc107',
+                    '#dc3545',
+                    '#0dcaf0',
+                    '#6f42c1',
+                    '#fd7e14',
+                    '#20c997'
+                ],
+                borderColor: [
+                    '#0d6efd',
+                    '#198754',
+                    '#ffc107',
+                    '#dc3545',
+                    '#0dcaf0',
+                    '#6f42c1',
+                    '#fd7e14',
+                    '#20c997'
+                ],
+                borderWidth: 2,
+                borderRadius: 5
+            }]
+        };
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

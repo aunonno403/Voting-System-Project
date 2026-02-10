@@ -5,25 +5,25 @@
 <!-- Search and Filter Section -->
 <div class="card mb-4">
     <div class="card-body">
-        <form method="get" class="form-inline">
-            <input type="text" name="search" class="form-control mr-2 mb-2" placeholder="Search polls..." value="{{ search_query }}">
+        <form method="get" class="d-flex flex-wrap gap-2">
+            <input type="text" name="search" class="form-control" placeholder="Search polls..." value="{{ search_query }}" style="flex: 1; min-width: 200px;">
             
-            <select name="category" class="form-control mr-2 mb-2">
+            <select name="category" class="form-control" style="flex: 1; min-width: 150px;">
                 <option value="">All Categories</option>
                 {% for cat in categories %}
                     <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
                 {% endfor %}
             </select>
             
-            <select name="status" class="form-control mr-2 mb-2">
+            <select name="status" class="form-control" style="flex: 1; min-width: 120px;">
                 <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
                 <option value="upcoming" {% if status == 'upcoming' %}selected{% endif %}>Upcoming</option>
                 <option value="expired" {% if status == 'expired' %}selected{% endif %}>Expired</option>
                 <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
             </select>
             
-            <button type="submit" class="btn btn-primary mb-2">Filter</button>
-            <a href="{% url 'polls:index' %}" class="btn btn-secondary ml-2 mb-2">Clear</a>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{% url 'polls:index' %}" class="btn btn-secondary">Clear</a>
         </form>
     </div>
 </div>
@@ -54,32 +54,32 @@
                     
                     <div class="mb-2">
                         {% if question.category %}
-                            <a href="{% url 'polls:category' question.category.slug %}" class="badge badge-info">{{ question.category.name }}</a>
+                            <a href="{% url 'polls:category' question.category.slug %}" class="badge bg-info text-dark">{{ question.category.name }}</a>
                         {% endif %}
                         
                         {% if question.allow_multiple_choices %}
-                            <span class="badge badge-warning">Multiple Choice</span>
+                            <span class="badge bg-warning text-dark">Multiple Choice</span>
                         {% endif %}
                         
                         {% if question.visibility == 'password' %}
-                            <span class="badge badge-secondary">🔒 Password Protected</span>
+                            <span class="badge bg-secondary">🔒 Password Protected</span>
                         {% elif question.visibility == 'private' %}
-                            <span class="badge badge-dark">🔒 Private</span>
+                            <span class="badge bg-dark">🔒 Private</span>
                             {% if user.is_authenticated and user in question.invited_users.all %}
-                                <span class="badge badge-info">👥 Invited</span>
+                                <span class="badge bg-info text-dark">👥 Invited</span>
                             {% endif %}
                         {% endif %}
                         
                         {% if question.is_upcoming %}
-                            <span class="badge badge-info">📅 Upcoming</span>
+                            <span class="badge bg-info text-dark">📅 Upcoming</span>
                         {% elif question.is_expired %}
-                            <span class="badge badge-danger">⏰ Expired</span>
+                            <span class="badge bg-danger">⏰ Expired</span>
                         {% elif question.is_active %}
-                            <span class="badge badge-success">✅ Active</span>
+                            <span class="badge bg-success">✅ Active</span>
                         {% endif %}
                         
                         {% if user.is_authenticated and question.id in user_votes %}
-                            <span class="badge badge-primary">✓ You Voted</span>
+                            <span class="badge bg-primary">✓ You Voted</span>
                         {% endif %}
                     </div>
                     

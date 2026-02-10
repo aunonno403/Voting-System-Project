@@ -22,13 +22,13 @@
                     <div class="form-group mb-3">
                         <label for="{{ form.username.id_for_label }}">Username:</label>
                         {{ form.username }}
-                        <small class="form-text text-muted">150 characters or fewer. Letters, digits and @/./+/-/_ only.</small>
+                        <small class="form-text text-body-secondary">150 characters or fewer. Letters, digits and @/./+/-/_ only.</small>
                     </div>
                     
                     <div class="form-group mb-3">
                         <label for="{{ form.password1.id_for_label }}">Password:</label>
                         {{ form.password1 }}
-                        <small class="form-text text-muted">
+                        <small class="form-text text-body-secondary">
                             <ul class="mb-0">
                                 <li>Your password can't be too similar to your other personal information.</li>
                                 <li>Your password must contain at least 8 characters.</li>
@@ -43,7 +43,7 @@
                         {{ form.password2 }}
                     </div>
                     
-                    <button type="submit" class="btn btn-primary btn-block w-100">Register</button>
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
                 </form>
                 
                 <hr>

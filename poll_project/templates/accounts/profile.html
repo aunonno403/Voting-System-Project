@@ -30,7 +30,7 @@
                                     {% for vote in choice.vote_set.all %}
                                         {% if vote.user == user %}
                                             <p class="mb-1">
-                                                <span class="badge badge-success">Your Vote:</span> 
+                                                <span class="badge bg-success">Your Vote:</span> 
                                                 <strong>{{ choice.choice_text }}</strong>
                                             </p>
                                         {% endif %}
@@ -73,7 +73,7 @@
                     </li>
                 </ul>
                 <hr>
-                <a href="{% url 'polls:index' %}" class="btn btn-primary btn-block w-100">Browse Polls</a>
+                <a href="{% url 'polls:index' %}" class="btn btn-primary w-100">Browse Polls</a>
             </div>
         </div>
         

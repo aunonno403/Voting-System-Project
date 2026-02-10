@@ -31,22 +31,22 @@
                     
                     <div class="mb-2">
                         {% if question.allow_multiple_choices %}
-                            <span class="badge badge-warning">Multiple Choice</span>
+                            <span class="badge bg-warning text-dark">Multiple Choice</span>
                         {% endif %}
                         
                         {% if question.visibility == 'password' %}
-                            <span class="badge badge-secondary">Password Protected</span>
+                            <span class="badge bg-secondary">Password Protected</span>
                         {% elif question.visibility == 'private' %}
-                            <span class="badge badge-dark">Private</span>
+                            <span class="badge bg-dark">Private</span>
                             {% if user.is_authenticated and user in question.invited_users.all %}
-                                <span class="badge badge-info">Invited</span>
+                                <span class="badge bg-info text-dark">Invited</span>
                             {% endif %}
                         {% endif %}
                         
                         {% if question.is_active %}
-                            <span class="badge badge-success">Active</span>
+                            <span class="badge bg-success">Active</span>
                         {% elif question.is_expired %}
-                            <span class="badge badge-danger">Expired</span>
+                            <span class="badge bg-danger">Expired</span>
                         {% endif %}
                         
                         {% if user.is_authenticated and question.id in user_votes %}

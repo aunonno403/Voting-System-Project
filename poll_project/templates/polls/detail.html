@@ -17,30 +17,30 @@
         
         <div class="mb-3">
             {% if question.category %}
-                <a href="{% url 'polls:category' question.category.slug %}" class="badge badge-info">{{ question.category.name }}</a>
+                <a href="{% url 'polls:category' question.category.slug %}" class="badge bg-info text-dark">{{ question.category.name }}</a>
             {% endif %}
             
             {% if question.allow_multiple_choices %}
-                <span class="badge badge-warning">Multiple Choice - Select all that apply</span>
+                <span class="badge bg-warning text-dark">Multiple Choice - Select all that apply</span>
             {% endif %}
             
             {% if question.visibility == 'private' and user.is_authenticated and user in question.invited_users.all %}
-                <span class="badge badge-dark">🔒 Private Poll</span>
-                <span class="badge badge-info">👥 You're Invited</span>
+                <span class="badge bg-dark">🔒 Private Poll</span>
+                <span class="badge bg-info text-dark">👥 You're Invited</span>
             {% elif question.visibility == 'private' and user == question.created_by %}
-                <span class="badge badge-dark">🔒 Private Poll (Your Poll)</span>
+                <span class="badge bg-dark">🔒 Private Poll (Your Poll)</span>
             {% elif question.visibility == 'password' %}
-                <span class="badge badge-secondary">🔒 Password Protected</span>
+                <span class="badge bg-secondary">🔒 Password Protected</span>
             {% endif %}
             
             {% if question.is_upcoming %}
-                <span class="badge badge-info">Starts: {{ question.start_date|date:"M d, Y H:i" }}</span>
+                <span class="badge bg-info text-dark">Starts: {{ question.start_date|date:"M d, Y H:i" }}</span>
             {% elif question.is_expired %}
-                <span class="badge badge-danger">Ended: {{ question.end_date|date:"M d, Y H:i" }}</span>
+                <span class="badge bg-danger">Ended: {{ question.end_date|date:"M d, Y H:i" }}</span>
             {% elif question.is_active %}
-                <span class="badge badge-success">Active</span>
+                <span class="badge bg-success">Active</span>
                 {% if question.end_date %}
-                    <span class="badge badge-secondary">Ends: {{ question.end_date|date:"M d, Y H:i" }}</span>
+                    <span class="badge bg-secondary">Ends: {{ question.end_date|date:"M d, Y H:i" }}</span>
                 {% endif %}
             {% endif %}
         </div>
@@ -96,20 +96,20 @@
                             <label for="choice{{ forloop.counter }}" class="form-check-label">
                                 <strong>{{ choice.choice_text }}</strong>
                                 {% if choice.id in user_votes %}
-                                    <span class="badge badge-primary">Your Current Vote</span>
+                                    <span class="badge bg-primary">Your Current Vote</span>
                                 {% endif %}
                             </label>
                             {% if choice.description %}
-                                <p class="text-muted small mb-0 ml-4">{{ choice.description }}</p>
+                                <p class="text-muted small mb-0 ms-4">{{ choice.description }}</p>
                             {% endif %}
                             {% if choice.image %}
-                                <img src="{{ choice.image.url }}" class="img-thumbnail ml-4 mt-2" style="max-width: 150px;" alt="Choice image">
+                                <img src="{{ choice.image.url }}" class="img-thumbnail ms-4 mt-2" style="max-width: 150px;" alt="Choice image">
                             {% endif %}
                         </div>
                     </div>
                 </div>
                 {% endfor %}
-                <input type="submit" value="{% if user_votes %}Update Vote{% else %}Vote{% endif %}" class="btn btn-success btn-lg btn-block mt-4 w-100" />
+                <input type="submit" value="{% if user_votes %}Update Vote{% else %}Vote{% endif %}" class="btn btn-success btn-lg w-100 mt-4" />
             </form>
         </div>
     </div>
@@ -143,7 +143,7 @@
                         <strong>{{ comment.user.username }}</strong>
                         <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
                         {% if comment.is_edited %}
-                            <span class="badge badge-secondary">edited</span>
+                            <span class="badge bg-secondary">edited</span>
                         {% endif %}
                     </h6>
                     <p>{{ comment.text }}</p>
